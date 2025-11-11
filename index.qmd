@@ -19,40 +19,8 @@ execute:
 2. A progressive stippling GIF animation
 3. Post both to a GitHub Pages site with appropriate captions and a brief explanation
 
-**Part 2 Preview:** On November 18th, we'll tackle Part 2 of this challenge, where you'll create a statistical meme about selection bias and missing data using your stippled images.
-:::
 
-## The Problem: Can Algorithms Create Art?
 
-**Core Question:** How can we convert a photograph into an aesthetically pleasing pattern of dots that preserves the visual information of the original image?
-
-**The Challenge:** Blue noise stippling is a technique that converts images into patterns of dots (stipples) using algorithms that balance visual accuracy with spatial distribution. This challenge asks you to implement a modified "void and cluster" algorithm that combines importance sampling with blue noise distribution properties to create stippling patterns that are both visually accurate and spatially well-distributed.
-
-**Our Approach:** We'll use a modified void-and-cluster algorithm that:
-1. Creates an importance map identifying visually important regions
-2. Uses a toroidal (periodic) Gaussian kernel for repulsion to ensure blue noise properties
-3. Iteratively selects points with minimum energy
-4. Balances image content importance with blue noise spatial distribution
-
-::: {.callout-warning}
-## ⚠️ AI Partnership Required
-
-This challenge pushes boundaries intentionally. You'll tackle problems that normally require weeks of study, but with Cursor AI as your partner (and your brain keeping it honest), you can accomplish more than you thought possible.
-
-**The new reality:** The four stages of competence are Ignorance → Awareness → Learning → Mastery. AI lets us produce Mastery-level work while operating primarily in the Awareness stage. I focus on awareness training, you leverage AI for execution, and together we create outputs that used to require years of dedicated study.
-:::
-
-## Introduction to Blue Noise Stippling
-
-Blue noise stippling is a technique for converting images into a pattern of dots (stipples) that preserves the visual information of the original image while creating an aesthetically pleasing, evenly distributed pattern. This method follows the approach described by [Bart Wronski](https://bartwronski.com/2022/08/31/progressive-image-stippling-and-greedy-blue-noise-importance-sampling/).
-
-The method uses a modified "void and cluster" algorithm that combines importance sampling with blue noise distribution properties to create stippling patterns that are both visually accurate and spatially well-distributed. This version uses **smooth extreme downweighting** that selectively downweights very dark and very light tones while preserving mid-tones, creating a more balanced distribution of stipples across the image.
-
-## Loading the Original Image
-
-First, let's load an image that we'll convert to a blue noise stippling pattern. You can use any image you'd like, but we'll demonstrate with the provided example.
-
-::: {.panel-tabset}
 
 ### Python
 
@@ -90,31 +58,6 @@ print(f"Image size: {img_array.shape[0]}x{img_array.shape[1]} pixels")
 
 
 
-:::
-
-## Importance Mapping
-
-Before applying the stippling algorithm, we create an **importance map** that identifies which regions of the image should receive more stipples. The importance map is computed by:
-
-- **Brightness inversion**: The image brightness is inverted so that dark areas receive higher importance and thus more dots, while light areas receive fewer dots
-- **Extreme tone downweighting**: Smooth Gaussian functions downweight tones below 0.2 (very dark) and above 0.8 (very light), creating a gradual transition that preserves mid-tones
-- **Mid-tone boost**: A smooth Gaussian function centered on mid-tones provides a gradual increase in importance for mid-tone regions, ensuring they receive appropriate stippling density
-- **Selective and effective**: This approach ensures that stipples are distributed appropriately (more dots in dark areas and mid-tones, fewer in extreme dark/light areas) while maintaining good spatial distribution
-
-::: {.callout-important}
-## 🎯 Key Tuning Point: `compute_importance` Function
-
-**This function is all you need to control dot distribution!** The `compute_importance` function is the primary mechanism for tuning where more or fewer dots appear in your stippled image. By adjusting its parameters, you can:
-
-- **Control which tones get more dots**: Adjust `extreme_threshold_low` and `extreme_threshold_high` to define what counts as "extreme" tones
-- **Reduce dots in extreme regions**: Increase `extreme_downweight` (0.0-1.0) to reduce stipples in very dark or very light areas
-- **Boost specific tone ranges**: Adjust `mid_tone_boost` and `mid_tone_center` to emphasize particular brightness ranges (e.g., skin tones around 0.7)
-- **Control transition smoothness**: Modify `extreme_sigma` and `mid_tone_sigma` to make transitions sharper or more gradual
-
-**No need to modify the stippling algorithm itself**—all the tuning happens in this function. Experiment with different parameter values to achieve your desired dot distribution!
-:::
-
-::: {.panel-tabset}
 
 ### Python
 
@@ -201,20 +144,8 @@ def compute_importance(
 
 
 
-:::
 
-## Blue Noise Stippling Algorithm
 
-The stippling algorithm uses a modified void-and-cluster approach that:
-
-1. Creates an importance map that identifies visually important regions
-2. Initializes an energy field based on the importance map (higher importance → lower energy)
-3. Uses a toroidal (periodic) Gaussian kernel for repulsion to ensure blue noise properties
-4. Iteratively selects points with minimum energy
-5. Adds Gaussian "splats" around selected points to prevent clustering
-6. Balances image content importance with blue noise spatial distribution
-
-::: {.panel-tabset}
 
 ### Python
 
@@ -325,13 +256,7 @@ def void_and_cluster(
 
 
 
-:::
 
-## Preparing the Working Image
-
-Before generating the stippling pattern, we prepare the image by resizing if necessary and computing the importance map.
-
-::: {.panel-tabset}
 
 ### Python
 
@@ -381,9 +306,7 @@ print("Importance map computed")
 
 ## Generating the Stippled Image
 
-Now let's apply the stippling algorithm to create the blue noise stippling pattern.
 
-::: {.panel-tabset}
 
 ### Python
 
@@ -414,9 +337,7 @@ print(f"Stipple pattern shape: {stipple_pattern.shape}")
 
 ## Displaying the Results
 
-Let's visualize the original image, the importance map, and the stippled version side by side for comparison.
 
-::: {.panel-tabset}
 
 ### Python
 
@@ -454,9 +375,7 @@ plt.show()
 
 ## Progressive Stippling Animation
 
-This section creates a GIF showing how the stippled image looks as more points are added sequentially. We'll use the already-computed stippling points to generate frames at increments of 100 points.
 
-::: {.panel-tabset}
 
 ### Python
 
@@ -507,12 +426,6 @@ print(f"Point counts: {point_counts}")
 
 
 
-:::
-
-Now let's create the GIF animation:
-
-::: {.panel-tabset}
-
 ### Python
 
 ```{python}
@@ -547,127 +460,11 @@ print(f"Point counts: {point_counts}")
 
 
 
-:::
-
-![Progressive stippling animation showing the sequential build-up of points. Each frame represents an increment of 100 points, demonstrating how the blue noise stippling pattern develops as more points are added.](progressive_stippling.gif)
-
-## Appendix: Average Tone by Section
-
-To understand the distribution of tones across the image and identify the center of skin tone, we divide the image into a grid of small sections and compute the average brightness in each section.
-
-::: {.panel-tabset}
-
-### Python
-
-```{python}
-#| label: tone-analysis
-#| echo: true
-#| fig-cap: "Grid showing average tone in each section"
-#| fig-width: 12
-#| fig-height: 8
-
-# Divide image into a grid of sections
-grid_rows = 16
-grid_cols = 12
-
-h, w = img_resized.shape
-section_h = h // grid_rows
-section_w = w // grid_cols
-
-# Create arrays to store average tones
-average_tones = np.zeros((grid_rows, grid_cols))
-section_coords = []
-
-# Compute average tone for each section
-for i in range(grid_rows):
-    for j in range(grid_cols):
-        y_start = i * section_h
-        y_end = (i + 1) * section_h if i < grid_rows - 1 else h
-        x_start = j * section_w
-        x_end = (j + 1) * section_w if j < grid_cols - 1 else w
-        
-        section = img_resized[y_start:y_end, x_start:x_end]
-        avg_tone = np.mean(section)
-        average_tones[i, j] = avg_tone
-        section_coords.append((i, j, avg_tone))
-
-# Display the grid with average tones
-fig, axes = plt.subplots(1, 2, figsize=(7, 5))
-
-# Show original image with grid overlay
-axes[0].imshow(img_resized, cmap='gray', vmin=0, vmax=1)
-axes[0].set_title('Original Image with Grid', fontsize=14, fontweight='bold', pad=10)
-axes[0].axis('off')
-
-# Draw grid lines
-for i in range(grid_rows + 1):
-    y = i * section_h
-    axes[0].axhline(y, color='red', linewidth=0.5, alpha=0.5)
-for j in range(grid_cols + 1):
-    x = j * section_w
-    axes[0].axvline(x, color='red', linewidth=0.5, alpha=0.5)
-
-# Show heatmap of average tones
-im = axes[1].imshow(average_tones, cmap='gray', vmin=0, vmax=1, aspect='auto')
-axes[1].set_title('Average Tone by Section', fontsize=14, fontweight='bold', pad=10)
-axes[1].set_xlabel('Column', fontsize=12)
-axes[1].set_ylabel('Row', fontsize=12)
-
-# Add text annotations showing average tone values
-for i in range(grid_rows):
-    for j in range(grid_cols):
-        tone = average_tones[i, j]
-        # Use white text for dark sections, black text for light sections
-        text_color = 'white' if tone < 0.5 else 'black'
-        axes[1].text(j, i, f'{tone:.2f}', ha='center', va='center', 
-                     color=text_color, fontsize=6, fontweight='bold')
-
-plt.colorbar(im, ax=axes[1], label='Average Brightness')
-plt.tight_layout()
-plt.show()
-
-# Print summary statistics
-print(f"\nGrid size: {grid_rows} rows × {grid_cols} columns")
-print(f"Section size: approximately {section_h} × {section_w} pixels")
-print(f"\nAverage tone statistics:")
-print(f"  Overall mean: {np.mean(average_tones):.3f}")
-print(f"  Overall std: {np.std(average_tones):.3f}")
-print(f"  Min: {np.min(average_tones):.3f}")
-print(f"  Max: {np.max(average_tones):.3f}")
-
-# Find sections with tones close to skin tone (around 0.7)
-skin_tone_target = 0.7
-tolerance = 0.1
-skin_tone_sections = [(i, j, tone) for i, j, tone in section_coords 
-                       if abs(tone - skin_tone_target) < tolerance]
-
-print(f"\nSections with tone close to skin tone (0.7 ± {tolerance}):")
-if skin_tone_sections:
-    for i, j, tone in sorted(skin_tone_sections, key=lambda x: abs(x[2] - skin_tone_target)):
-        print(f"  Row {i}, Col {j}: {tone:.3f}")
-else:
-    print("  None found")
-
-# Print full grid as table
-print(f"\nFull grid of average tones (row, col):")
-print("     ", end="")
-for j in range(grid_cols):
-    print(f"Col{j:2d} ", end="")
-print()
-for i in range(grid_rows):
-    print(f"Row{i:2d} ", end="")
-    for j in range(grid_cols):
-        print(f"{average_tones[i, j]:.3f} ", end="")
-    print()
-```
 
 
-
-:::
 
 ## Challenge Requirements 📋
 
-::: {.panel-tabset}
 
 ### Python
 
@@ -696,5 +493,5 @@ plt.show()
 
 
 
-:::
+
 
